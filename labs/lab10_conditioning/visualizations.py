@@ -137,7 +137,21 @@ def make_displayed_rectangles(combinations):
             rectangles.append(rectangle_for_percentile(start_percentile, end_percentile, color))
         return rectangles
 
-    displays.append_column("rectangles", displays.apply(rectangles_for_percentage_range, ["start amount", "end amount", "color"]))
+    # Updated rest of code below to address error with Table.apply not working with multiple columns
+
+    small_displays = displays.select("start amount", 'end amount', 'color')
+
+    small_start = small_displays.column("start amount")
+    small_end = small_displays.column("end amount")
+    small_color = small_displays.column("color")
+
+    stack_array = []
+
+    for this_row in range(0, small_displays.num_rows):
+        stack_array.append(rectangles_for_percentage_range(small_start.item(this_row), small_end.item(this_row), small_color.item(this_row)))
+
+    #displays.append_column("rectangles", displays.apply(rectangles_for_percentage_range, ["start amount", "end amount", "color"]))
+    displays.append_column("rectangles", stack_array)
 
     return displays
 
